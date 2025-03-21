@@ -1,17 +1,13 @@
-import { Admin, Resource } from "react-admin";
-import jsonServerProvider from "ra-data-json-server";
-import { StaffList } from "./components/StaffList";
-import { BranchList } from "./components/BranchList";
-import { ClientList } from "./components/ClientList";
+import React from 'react';
+import './App.css';
+import StaffList from './components/StaffList';
 
-const dataProvider = jsonServerProvider("http://localhost:8000"); // Flask API endpoint
-
-export function App() {
+function App() {
   return (
-    <Admin dataProvider={dataProvider}>
-      <Resource name="staff" list={StaffList} />
-      <Resource name="branches" list={BranchList} />
-      <Resource name="clients" list={ClientList} />
-    </Admin>
+    <div className="App">
+      <h1>Staff Management</h1> {/* ✅ Testing Staff List */}
+      <StaffList /> {/* ✅ Staff List rendering */}
+    </div>
   );
 }
+export default App;
