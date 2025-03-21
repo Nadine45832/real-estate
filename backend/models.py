@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 class Staff(db.Model):
     __tablename__ = "DH_STAFF"
 
@@ -17,6 +18,7 @@ class Staff(db.Model):
     mobile = db.Column(db.String(16), name="MOBILE")
     email = db.Column(db.String(50), name="EMAIL")
 
+
 class Branch(db.Model):
     __tablename__ = "DH_BRANCH"
 
@@ -24,6 +26,7 @@ class Branch(db.Model):
     street = db.Column(db.String(50), name="STREET")
     city = db.Column(db.String(50), name="CITY")
     postcode = db.Column(db.String(20), name="POSTCODE")
+
 
 class Client(db.Model):
     __tablename__ = "DH_CLIENT"
@@ -38,15 +41,19 @@ class Client(db.Model):
     pref_type = db.Column(db.String(5), name="PREFTYPE")
     max_rent = db.Column(db.Numeric(38, 0), name="MAXRENT")
 
+
 class Lease(db.Model):
     __tablename__ = "DH_LEASE"
 
     lease_no = db.Column(db.Integer, primary_key=True, name="LEASENO")
-    client_no = db.Column(db.String(50), db.ForeignKey('DH_CLIENT.CLIENTNO'), name="CLIENTNO")
+    client_no = db.Column(
+        db.String(50), db.ForeignKey("DH_CLIENT.CLIENTNO"), name="CLIENTNO"
+    )
     property_no = db.Column(db.String(10), name="PROPERTYNO")
     lease_amount = db.Column(db.Numeric(9, 2), name="LEASEAMOUNT")
     lease_start = db.Column(db.Date, name="LEASE_START")
     lease_end = db.Column(db.Date, name="LEASE_END")
+
 
 class PropertyForRent(db.Model):
     __tablename__ = "DH_PROPERTYFORRENT"
@@ -64,13 +71,27 @@ class PropertyForRent(db.Model):
     picture = db.Column(db.String(50), name="PICTURE")
     floorplan = db.Column(db.String(100), name="FLOORPLAN")
 
+
 class Registration(db.Model):
     __tablename__ = "DH_REGISTRATION"
 
-    client_no = db.Column(db.String(50), db.ForeignKey('DH_CLIENT.CLIENTNO'), primary_key=True, name="CLIENTNO")
-    branch_no = db.Column(db.String(50), db.ForeignKey('DH_BRANCH.BRANCHNO'), primary_key=True, name="BRANCHNO")
-    staff_no = db.Column(db.String(50), db.ForeignKey('DH_STAFF.STAFFNO'), name="STAFFNO")
+    client_no = db.Column(
+        db.String(50),
+        db.ForeignKey("DH_CLIENT.CLIENTNO"),
+        primary_key=True,
+        name="CLIENTNO",
+    )
+    branch_no = db.Column(
+        db.String(50),
+        db.ForeignKey("DH_BRANCH.BRANCHNO"),
+        primary_key=True,
+        name="BRANCHNO",
+    )
+    staff_no = db.Column(
+        db.String(50), db.ForeignKey("DH_STAFF.STAFFNO"), name="STAFFNO"
+    )
     date_register = db.Column(db.Date, name="DATEREGISTER")
+
 
 class PrivateOwner(db.Model):
     __tablename__ = "DH_PRIVATEOWNER"
@@ -83,10 +104,21 @@ class PrivateOwner(db.Model):
     email = db.Column(db.String(50), name="EMAIL")
     password = db.Column(db.String(40), name="PASSWORD")
 
+
 class Viewing(db.Model):
     __tablename__ = "DH_VIEWING"
 
-    client_no = db.Column(db.String(50), db.ForeignKey('DH_CLIENT.CLIENTNO'), primary_key=True, name="CLIENTNO")
-    property_no = db.Column(db.String(10), db.ForeignKey('DH_PROPERTYFORRENT.PROPERTYNO'), primary_key=True, name="PROPERTYNO")
+    client_no = db.Column(
+        db.String(50),
+        db.ForeignKey("DH_CLIENT.CLIENTNO"),
+        primary_key=True,
+        name="CLIENTNO",
+    )
+    property_no = db.Column(
+        db.String(10),
+        db.ForeignKey("DH_PROPERTYFORRENT.PROPERTYNO"),
+        primary_key=True,
+        name="PROPERTYNO",
+    )
     view_date = db.Column(db.Date, name="VIEWDATE")
     comments = db.Column(db.String(200), name="COMMENTS")
