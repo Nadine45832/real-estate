@@ -1,5 +1,4 @@
 import oracledb
-import os
 
 DB_USER = "COMP214_W25_ers_72"
 DB_PASSWORD = "password"
@@ -19,6 +18,7 @@ def get_db_connection():
     except oracledb.DatabaseError as e:
         print(" Oracle DB Connection Failed:", e)
         return None
+
 
 # Main
 if __name__ == "__main__":

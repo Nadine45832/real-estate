@@ -1,19 +1,13 @@
 # routes.py
 from flask import Blueprint, request, jsonify, render_template, flash, redirect, url_for
-import sys
-import os
 import oracledb
 from datetime import datetime
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(current_dir))
-from config import get_db_connection
+from .config import get_db_connection
 
 dh_routes = Blueprint("dh_routes", __name__)
 
 
-@dh_routes.route("/staff/list", methods=["GET"])
-#Search staff
+@dh_routes.route("/staff", methods=["GET"])
 def list_staff():
     connection = None
     cursor = None
@@ -41,19 +35,21 @@ def list_staff():
         rows = cursor.fetchall()
         staff_list = []
         for row in rows:
-            staff_list.append({
-                "staff_no": row[0],
-                "first_name": row[1],
-                "last_name": row[2],
-                "position": row[3],
-                "sex": row[4],
-                "dob": row[5],
-                "salary": row[6],
-                "branch_no": row[7],
-                "telephone": row[8],
-                "mobile": row[9],
-                "email": row[10],
-            })
+            staff_list.append(
+                {
+                    "staff_no": row[0],
+                    "first_name": row[1],
+                    "last_name": row[2],
+                    "position": row[3],
+                    "sex": row[4],
+                    "dob": row[5],
+                    "salary": row[6],
+                    "branch_no": row[7],
+                    "telephone": row[8],
+                    "mobile": row[9],
+                    "email": row[10],
+                }
+            )
         return jsonify(staff_list), 200
 
     except Exception as e:
@@ -64,8 +60,8 @@ def list_staff():
         if connection:
             connection.close()
 
-@dh_routes.route("/staff/hire", methods=["POST"])
-# Add new staff
+
+@dh_routes.route("/staff", methods=["PUT"])
 def hire_staff():
     data = request.form if request.form else request.json
 
@@ -96,9 +92,20 @@ def hire_staff():
         cursor = connection.cursor()
 
         # Call staff_hire_sp
-        cursor.callproc("staff_hire_sp", [
-            staff_no, first_name, last_name, position, sex, dob, salary, branch_no, telephone
-        ])
+        cursor.callproc(
+            "staff_hire_sp",
+            [
+                staff_no,
+                first_name,
+                last_name,
+                position,
+                sex,
+                dob,
+                salary,
+                branch_no,
+                telephone,
+            ],
+        )
 
         connection.commit()
         return jsonify({"message": "Staff hired successfully"}), 201
@@ -132,9 +139,9 @@ def update_staff():
         cursor = connection.cursor()
 
         # Call update_staff_sp
-        cursor.callproc("update_staff_sp", [
-            staff_no, new_salary, new_telephone, new_email
-        ])
+        cursor.callproc(
+            "update_staff_sp", [staff_no, new_salary, new_telephone, new_email]
+        )
 
         connection.commit()
         return jsonify({"message": "Staff updated successfully"}), 200
@@ -198,9 +205,9 @@ def update_branch():
         cursor = connection.cursor()
 
         # Call update_branch_sp
-        cursor.callproc("update_branch_sp", [
-            branch_no, new_street, new_city, new_postcode
-        ])
+        cursor.callproc(
+            "update_branch_sp", [branch_no, new_street, new_city, new_postcode]
+        )
 
         connection.commit()
         return jsonify({"message": "Branch updated successfully"}), 200
@@ -232,9 +239,7 @@ def new_branch():
         cursor = connection.cursor()
 
         # Call new_branch_sp
-        cursor.callproc("new_branch_sp", [
-            branch_no, street, city, postcode
-        ])
+        cursor.callproc("new_branch_sp", [branch_no, street, city, postcode])
 
         connection.commit()
         return jsonify({"message": "New branch created"}), 201
@@ -271,9 +276,20 @@ def new_client():
             return jsonify({"error": "DB connection failed"}), 500
         cursor = connection.cursor()
 
-        cursor.callproc("new_client_sp", [
-            client_no, first_name, last_name, phone, street, city, email, pref_type, max_rent
-        ])
+        cursor.callproc(
+            "new_client_sp",
+            [
+                client_no,
+                first_name,
+                last_name,
+                phone,
+                street,
+                city,
+                email,
+                pref_type,
+                max_rent,
+            ],
+        )
 
         connection.commit()
         return jsonify({"message": "New client registered"}), 201
@@ -304,9 +320,7 @@ def update_client():
             return jsonify({"error": "DB connection failed"}), 500
         cursor = connection.cursor()
 
-        cursor.callproc("update_client_sp", [
-            client_no, new_phone, new_email, new_city
-        ])
+        cursor.callproc("update_client_sp", [client_no, new_phone, new_email, new_city])
 
         connection.commit()
         return jsonify({"message": "Client updated"}), 200

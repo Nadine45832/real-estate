@@ -1,7 +1,3 @@
-import os
-import sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(current_dir))
 from config import get_db_connection
 
 
