@@ -1,7 +1,7 @@
 const API_URL = "http://localhost:8000";
 
 const idFields = {
-  staff: "staff_id",
+  staff: "staff_no",
   branches: "branch_id",
   clients: "client_id",
 };

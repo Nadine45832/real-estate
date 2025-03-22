@@ -61,6 +61,57 @@ def list_staff():
             connection.close()
 
 
+@dh_routes.route("/staff/<staff_no>", methods=["GET"])
+def one_staff(staff_no):
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({"error": "DB connection failed"}), 500
+        cursor = connection.cursor()
+        query = """
+            SELECT 
+                STAFFNO, 
+                FNAME, 
+                LNAME, 
+                POSITION, 
+                SEX, 
+                TO_CHAR(DOB, 'YYYY-MM-DD') AS DOB, 
+                SALARY, 
+                BRANCHNO, 
+                TELEPHONE,
+                NVL(MOBILE, '') AS MOBILE,
+                NVL(EMAIL, '') AS EMAIL
+            FROM DH_STAFF
+            WHERE STAFFNO = :staff_no
+        """
+        cursor.execute(query, [staff_no])
+        row = cursor.fetchone()
+        val = {
+            "staff_no": row[0],
+            "first_name": row[1],
+            "last_name": row[2],
+            "position": row[3],
+            "sex": row[4],
+            "dob": row[5],
+            "salary": row[6],
+            "branch_no": row[7],
+            "telephone": row[8],
+            "mobile": row[9],
+            "email": row[10],
+        }
+        return jsonify(val), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
 @dh_routes.route("/staff", methods=["PUT"])
 def hire_staff():
     data = request.form if request.form else request.json
