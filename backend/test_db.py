@@ -1,4 +1,4 @@
-from config import get_db_connection
+from backend.config import get_db_connection
 
 
 conn = get_db_connection()

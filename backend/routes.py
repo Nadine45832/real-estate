@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify, render_template, flash, redirect, url_for
 import oracledb
 from datetime import datetime
-from .config import get_db_connection
+from config import get_db_connection
 
 dh_routes = Blueprint("dh_routes", __name__)
 

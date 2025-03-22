@@ -22,7 +22,7 @@ const StaffList: React.FC = () => {
 
   useEffect(() => {
     axios
-      .get<Staff[]>("http://127.0.0.1:5000/staff/list")
+      .get<Staff[]>("http://127.0.0.1:5000/staff")
       .then((res) => {
         setStaffList(res.data);
         setLoading(false);
