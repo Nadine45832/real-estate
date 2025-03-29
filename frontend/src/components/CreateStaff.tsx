@@ -3,6 +3,7 @@ import {
   DateInput,
   Edit,
   NumberInput,
+  ReferenceInput,
   SelectInput,
   SimpleForm,
   TextInput,
@@ -23,7 +24,11 @@ const Form = () => (
     />
     <DateInput source="dob" label="Date of Birth" />
     <NumberInput source="salary" label="Salary" />
-    <TextInput source="branch_no" label="Branch Number" />
+    <ReferenceInput
+      source="branch_no"
+      reference="branch"
+      label="Branch Number"
+    />
     <TextInput source="telephone" label="Telephone" />
     <TextInput source="mobile" label="Mobile" />
     <TextInput source="email" label="Email" />

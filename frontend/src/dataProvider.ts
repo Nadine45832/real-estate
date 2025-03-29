@@ -2,8 +2,8 @@ const API_URL = "http://localhost:8000";
 
 const idFields = {
   staff: "staff_no",
-  branches: "branch_id",
-  clients: "client_id",
+  branch: "branch_no",
+  client: "client_no",
 };
 
 const mapId = (resource) => (record) => ({
@@ -28,6 +28,19 @@ export const dataProvider = {
     });
     const data = await response.json();
     return { data: mapId(resource)(data) };
+  },
+
+  getMany: async (resource, params) => {
+    const response = await fetch(`${API_URL}/${resource}`, {
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await response.json();
+    return {
+      data: data
+        .map(mapId(resource))
+        .filter((elt) => params.ids.includes(elt.id)),
+    };
   },
 
   create: async (resource, params) => {

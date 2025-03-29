@@ -12,7 +12,8 @@ dh_routes = Blueprint("dh_routes", __name__)
 def list_staff():
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 STAFFNO, 
                 FNAME, 
@@ -26,7 +27,8 @@ def list_staff():
                 NVL(MOBILE, '') AS MOBILE,
                 NVL(EMAIL, '') AS EMAIL
             FROM DH_STAFF
-        """)
+        """
+        )
         rows = cursor.fetchall()
 
         staff_list = [
@@ -54,7 +56,8 @@ def list_staff():
 def one_staff(staff_no):
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 STAFFNO, 
                 FNAME, 
@@ -69,27 +72,33 @@ def one_staff(staff_no):
                 NVL(EMAIL, '')
             FROM DH_STAFF
             WHERE STAFFNO = :staff_no
-        """, [staff_no])
+        """,
+            [staff_no],
+        )
 
         row = cursor.fetchone()
         if not row:
             abort(404)
 
-        return jsonify({
-            "id": row[0],
-            "staff_no": row[0],
-            "first_name": row[1],
-            "last_name": row[2],
-            "position": row[3],
-            "sex": row[4],
-            "dob": row[5],
-            "salary": row[6],
-            "branch_no": row[7],
-            "telephone": row[8],
-            "mobile": row[9],
-            "email": row[10],
-        }), 200
-
+        return (
+            jsonify(
+                {
+                    "id": row[0],
+                    "staff_no": row[0],
+                    "first_name": row[1],
+                    "last_name": row[2],
+                    "position": row[3],
+                    "sex": row[4],
+                    "dob": row[5],
+                    "salary": row[6],
+                    "branch_no": row[7],
+                    "telephone": row[8],
+                    "mobile": row[9],
+                    "email": row[10],
+                }
+            ),
+            200,
+        )
 
 
 @dh_routes.route("/staff", methods=["POST"])
@@ -111,25 +120,25 @@ def hire_staff():
 
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.callproc("staff_hire_sp", [
-            staff_no,
-            first_name,
-            last_name,
-            position,
-            sex,
-            dob,
-            salary,
-            branch_no,
-            telephone,
-            mobile,
-            email
-        ])
+        cursor.callproc(
+            "staff_hire_sp",
+            [
+                staff_no,
+                first_name,
+                last_name,
+                position,
+                sex,
+                dob,
+                salary,
+                branch_no,
+                telephone,
+                mobile,
+                email,
+            ],
+        )
         connection.commit()
 
-    return jsonify({ "message": "New staff successfully added." }), 201
-
-
-
+    return jsonify({"message": "New staff successfully added."}), 201
 
 
 @dh_routes.route("/staff/<staff_no>", methods=["PUT"])
@@ -147,34 +156,72 @@ def update_staff(staff_no):
         cursor.callproc("update_staff_sp", [staff_no, salary, telephone, email])
         connection.commit()
 
-    return jsonify({ 'message': 'update staff successfully.' }), 200
+    return jsonify({"message": "update staff successfully."}), 200
 
 
-@dh_routes.route("/branches", methods=["GET"])
+@dh_routes.route("/branch", methods=["GET"])
 def list_branches():
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
                     SELECT 
                     BRANCHNO, 
                     STREET, 
                     CITY, 
                     POSTCODE
                     FROM DH_BRANCH
-                """)
+                """
+        )
         rows = cursor.fetchall()
-        result=[]
+        result = []
         for r in rows:
-            result.append({
-                "branch_no": r[0],
-                "street": r[1],
-                "city": r[2],
-                "postcode": r[3],
-            })
+            result.append(
+                {
+                    "branch_no": r[0],
+                    "street": r[1],
+                    "city": r[2],
+                    "postcode": r[3],
+                }
+            )
         return jsonify(result), 200
+
 
 @dh_routes.route("/branch/<branch_no>", methods=["GET"])
 def get_one_branch(branch_no):
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+                    SELECT 
+                    BRANCHNO, 
+                    STREET, 
+                    CITY, 
+                    POSTCODE
+                    FROM DH_BRANCH
+                    WHERE BRANCHNO = :branch_no
+                """,
+            [branch_no],
+        )
+        row = cursor.fetchone()
+        if not row:
+            abort(404)
+
+        return (
+            jsonify(
+                {
+                    "branch_no": row[0],
+                    "street": row[1],
+                    "city": row[2],
+                    "postcode": row[3],
+                }
+            ),
+            200,
+        )
+
+
+@dh_routes.route("/branch/<branch_no>/address", methods=["GET"])
+def get_branch_address(branch_no):
     connection = get_db_connection()
 
     with connection.cursor() as cursor:
@@ -184,10 +231,8 @@ def get_one_branch(branch_no):
     if not address:
         return jsonify({"error": "No address found"}), 404
 
-    return jsonify({
-        "branch_no": branch_no,
-        "address": address
-    }), 200
+    return jsonify({"branch_no": branch_no, "address": address}), 200
+
 
 @dh_routes.route("/branch/<branch_no>", methods=["PUT"])
 def update_branch(branch_no):
@@ -199,11 +244,12 @@ def update_branch(branch_no):
 
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.callproc("update_branch_sp", [branch_no, new_street, new_city, new_postcode])
+        cursor.callproc(
+            "update_branch_sp", [branch_no, new_street, new_city, new_postcode]
+        )
         connection.commit()
 
     return jsonify({"message": "Branch updated successfully"}), 200
-
 
 
 @dh_routes.route("/branch", methods=["POST"])
@@ -223,12 +269,12 @@ def new_branch():
     return jsonify({"message": "New branch created"}), 201
 
 
-
-@dh_routes.route("/clients", methods=["GET"])
+@dh_routes.route("/client", methods=["GET"])
 def list_clients():
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 CLIENTNO, 
                 FNAME, 
@@ -240,7 +286,8 @@ def list_clients():
                 PREFTYPE, 
                 MAXRENT
             FROM DH_CLIENT
-        """)
+        """
+        )
         rows = cursor.fetchall()
 
         clients = [
@@ -254,7 +301,7 @@ def list_clients():
                 "city": row[5],
                 "email": row[6],
                 "pref_type": row[7],
-                "max_rent": row[8]
+                "max_rent": row[8],
             }
             for row in rows
         ]
@@ -266,7 +313,8 @@ def list_clients():
 def get_one_client(client_no):
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 CLIENTNO, 
                 FNAME, 
@@ -279,24 +327,32 @@ def get_one_client(client_no):
                 MAXRENT
             FROM DH_CLIENT
             WHERE CLIENTNO = :client_no
-        """, [client_no])
+        """,
+            [client_no],
+        )
 
         row = cursor.fetchone()
         if not row:
             abort(404)
 
-        return jsonify({
-            "id": row[0],
-            "client_no": row[0],
-            "first_name": row[1],
-            "last_name": row[2],
-            "phone": row[3],
-            "street": row[4],
-            "city": row[5],
-            "email": row[6],
-            "pref_type": row[7],
-            "max_rent": row[8]
-        }), 200
+        return (
+            jsonify(
+                {
+                    "id": row[0],
+                    "client_no": row[0],
+                    "first_name": row[1],
+                    "last_name": row[2],
+                    "phone": row[3],
+                    "street": row[4],
+                    "city": row[5],
+                    "email": row[6],
+                    "pref_type": row[7],
+                    "max_rent": row[8],
+                }
+            ),
+            200,
+        )
+
 
 @dh_routes.route("/client", methods=["POST"])
 def new_client():
@@ -314,21 +370,23 @@ def new_client():
 
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.callproc("new_client_sp", [
-            client_no,
-            first_name,
-            last_name,
-            phone,
-            street,
-            city,
-            email,
-            pref_type,
-            max_rent
-        ])
+        cursor.callproc(
+            "new_client_sp",
+            [
+                client_no,
+                first_name,
+                last_name,
+                phone,
+                street,
+                city,
+                email,
+                pref_type,
+                max_rent,
+            ],
+        )
         connection.commit()
 
-    return jsonify({ "message": "New client created" }), 201
-
+    return jsonify({"message": "New client created"}), 201
 
 
 @dh_routes.route("/client/<client_no>", methods=["PUT"])
@@ -341,12 +399,7 @@ def update_client(client_no):
 
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.callproc("update_client_sp", [
-            client_no,
-            new_phone,
-            new_email,
-            new_city
-        ])
+        cursor.callproc("update_client_sp", [client_no, new_phone, new_email, new_city])
         connection.commit()
 
-    return jsonify({ "message": "Client successfully updated." }), 200
+    return jsonify({"message": "Client successfully updated."}), 200
