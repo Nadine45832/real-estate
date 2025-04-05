@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import {
   Create,
   DateInput,
@@ -7,10 +8,12 @@ import {
   SelectInput,
   SimpleForm,
   TextInput,
+  useRecordContext,
 } from "react-admin";
 
 const Form = () => (
   <SimpleForm>
+    <TextInput source="staff_no" label="Staff #" />
     <TextInput source="first_name" label="First Name" />
     <TextInput source="last_name" label="Last Name" />
     <TextInput source="position" label="Position" />
@@ -43,6 +46,25 @@ export const StaffCreate = () => (
 
 export const StaffEdit = () => (
   <Edit>
-    <Form />
+    <EditStaffForm />
   </Edit>
 );
+
+const EditStaffForm = () => {
+  const record = useRecordContext();
+
+  return (
+    <div>
+      <div style={{ margin: "1em" }}>
+        <Typography variant="h3">{`${record.first_name} ${record.last_name}`}</Typography>
+        <Typography variant="body2">Position: {record.position}</Typography>
+        <Typography variant="body2">Branch: {record.branch_no}</Typography>
+      </div>
+      <SimpleForm>
+        <NumberInput source="salary" label="Salary" />
+        <TextInput source="telephone" label="Telephone" />
+        <TextInput source="email" label="Email" />
+      </SimpleForm>
+    </div>
+  );
+};
