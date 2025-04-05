@@ -1,6 +1,5 @@
 # routes.py
-from flask import Blueprint, request, jsonify, render_template, flash, redirect, url_for
-import oracledb
+from flask import Blueprint, request, jsonify
 from datetime import datetime
 from config import get_db_connection
 from flask import abort
@@ -159,6 +158,22 @@ def update_staff(staff_no):
     return jsonify({"message": "update staff successfully."}), 200
 
 
+@dh_routes.route("/staff/<staff_no>", methods=["DELETE"])
+def delete_staff(staff_no):
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            DELETE FROM DH_STAFF
+            WHERE STAFFNO = :staff_no
+        """,
+            [staff_no],
+        )
+        connection.commit()
+
+        return jsonify({"message": "staff successfully deleted"}), 200
+
+
 @dh_routes.route("/branch", methods=["GET"])
 def list_branches():
     connection = get_db_connection()
@@ -250,6 +265,22 @@ def update_branch(branch_no):
         connection.commit()
 
     return jsonify({"message": "Branch updated successfully"}), 200
+
+
+@dh_routes.route("/branch/<branch_no>", methods=["DELETE"])
+def delete_branch(branch_no):
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            DELETE FROM DH_BRANCH
+            WHERE BRANCHNO = :branch_no
+        """,
+            [branch_no],
+        )
+        connection.commit()
+
+        return jsonify({"message": "Branch successfully deleted"}), 200
 
 
 @dh_routes.route("/branch", methods=["POST"])
@@ -417,3 +448,19 @@ def update_client(client_no):
         connection.commit()
 
     return jsonify({"message": "Client successfully updated."}), 200
+
+
+@dh_routes.route("/client/<client_no>", methods=["DELETE"])
+def delete_client(client_no):
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            DELETE FROM DH_CLIENT
+            WHERE CLIENTNO = :client_no
+        """,
+            [client_no],
+        )
+        connection.commit()
+
+        return jsonify({"message": "Client successfully deleted"}), 200
