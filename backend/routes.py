@@ -395,11 +395,25 @@ def update_client(client_no):
 
     new_phone = data.get("phone", "").strip()
     new_email = data.get("email", "").strip()
+    new_street = data.get("street", "").strip()
     new_city = data.get("city", "").strip()
+    new_pref_type = data.get("pref_type", "").strip()
+    new_max_rent = data.get("max_rent", 0)
 
     connection = get_db_connection()
     with connection.cursor() as cursor:
-        cursor.callproc("update_client_sp", [client_no, new_phone, new_email, new_city])
+        cursor.callproc(
+            "update_client_sp",
+            [
+                client_no,
+                new_phone,
+                new_email,
+                new_street,
+                new_city,
+                new_pref_type,
+                new_max_rent,
+            ],
+        )
         connection.commit()
 
     return jsonify({"message": "Client successfully updated."}), 200
