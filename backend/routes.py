@@ -1,23 +1,101 @@
 # routes.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, json, request, jsonify
 from datetime import datetime
 from config import get_db_connection
 from flask import abort
 
 dh_routes = Blueprint("dh_routes", __name__)
 
+SORT_STAFF_MAP = {
+    "staff_no": "STAFFNO",
+    "first_name": "FNAME",
+    "last_name": "LNAME",
+    "position": "POSITION",
+    "sex": "SEX",
+    "dob": "DOB",
+    "salary": "SALARY",
+    "branch_no": "BRANCHNO",
+    "telephone": "TELEPHONE",
+    "mobile": "MOBILE",
+    "email": "EMAIL",
+}
+
+
+SORT_BRANCH_MAP = {
+    "branch_no": "BRANCHNO",
+    "street": "STREET",
+    "city": "CITY",
+    "postcode": "POSTCODE",
+}
+
+
+SORT_MAP_CLIENT = {
+    "client_no": "CLIENTNO",
+    "first_name": "FNAME",
+    "last_name": "LNAME",
+    "phone": "TELNO",
+    "street": "STREET",
+    "city": "CITY",
+    "email": "EMAIL",
+    "pref_type": "PREFTYPE",
+    "max_rent": "MAXRENT",
+}
+
+
+def get_params(map_sort: dict, default_sort: str):
+    params = request.args
+    sort = params.get("_sort", "").strip()
+    order = params.get("_order", "").strip()
+
+    sort_field = map_sort.get(sort, default_sort)
+    sorting_by = (
+        f"{sort_field} {order}" if order in ["ASC", "DESC"] else f"{sort_field} ASC"
+    )
+
+    filter_param = params.get("filter")
+    if filter_param and filter_param != "undefined":
+        filters = json.loads(filter_param)
+    else:
+        filters = {}
+
+    mapped_filters = {
+        map_sort.get(k, k): f"%{str(v).strip()}%" for k, v in filters.items() if v
+    }
+    try:
+        limit = int(params.get("_limit", "").strip() or "10")
+    except ValueError:
+        limit = 10
+
+    try:
+        page = int(params.get("_page", "").strip())
+    except ValueError:
+        page = 1
+
+    offset = (page - 1) * limit
+
+    return sorting_by, limit, offset, mapped_filters
+
 
 @dh_routes.route("/staff", methods=["GET"])
 def list_staff():
+
+    sorting_by, limit, offset, _ = get_params(SORT_STAFF_MAP, "STAFFNO")
+    count = 0
+
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM DH_STAFF")
+        count = cursor.fetchone()[0]
+
     connection = get_db_connection()
     with connection.cursor() as cursor:
         cursor.execute(
-            """
+            f"""
             SELECT 
-                STAFFNO, 
-                FNAME, 
-                LNAME, 
-                POSITION, 
+                STAFFNO,
+                FNAME,
+                LNAME,
+                POSITION,
                 SEX, 
                 TO_CHAR(DOB, 'YYYY-MM-DD') AS DOB, 
                 SALARY, 
@@ -26,7 +104,11 @@ def list_staff():
                 NVL(MOBILE, '') AS MOBILE,
                 NVL(EMAIL, '') AS EMAIL
             FROM DH_STAFF
-        """
+            ORDER BY {sorting_by}
+            OFFSET :offset ROWS
+            FETCH NEXT :limit ROWS ONLY
+            """,
+            {"offset": offset, "limit": limit},
         )
         rows = cursor.fetchall()
 
@@ -48,7 +130,9 @@ def list_staff():
             for row in rows
         ]
 
-        return jsonify(staff_list), 200
+        response = jsonify(staff_list)
+        response.headers.add("x-total-count", str(count))
+        return response, 200
 
 
 @dh_routes.route("/staff/<staff_no>", methods=["GET"])
@@ -176,17 +260,30 @@ def delete_staff(staff_no):
 
 @dh_routes.route("/branch", methods=["GET"])
 def list_branches():
+
+    sorting_by, limit, offset, _ = get_params(SORT_BRANCH_MAP, "BRANCHNO")
+    count = 0
+
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM DH_BRANCH")
+        count = cursor.fetchone()[0]
+
     connection = get_db_connection()
     with connection.cursor() as cursor:
         cursor.execute(
-            """
-                    SELECT 
+            f"""
+                SELECT 
                     BRANCHNO, 
                     STREET, 
                     CITY, 
                     POSTCODE
-                    FROM DH_BRANCH
-                """
+                FROM DH_BRANCH
+                ORDER BY {sorting_by}
+                OFFSET :offset ROWS
+                FETCH NEXT :limit ROWS ONLY
+            """,
+            {"offset": offset, "limit": limit},
         )
         rows = cursor.fetchall()
         result = []
@@ -199,7 +296,9 @@ def list_branches():
                     "postcode": r[3],
                 }
             )
-        return jsonify(result), 200
+        response = jsonify(result)
+        response.headers.add("x-total-count", str(count))
+        return response, 200
 
 
 @dh_routes.route("/branch/<branch_no>", methods=["GET"])
@@ -302,10 +401,25 @@ def new_branch():
 
 @dh_routes.route("/client", methods=["GET"])
 def list_clients():
+
+    sorting_by, limit, offset, filters = get_params(SORT_MAP_CLIENT, "CLIENTNO")
+    count = 0
+
+    if filters:
+        where_clause = " AND ".join([f"{key} LIKE :{key}" for key in filters.keys()])
+    else:
+        where_clause = "1=1"
+    where_clause = f"WHERE {where_clause}"
+
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM DH_CLIENT")
+        count = cursor.fetchone()[0]
+
     connection = get_db_connection()
     with connection.cursor() as cursor:
         cursor.execute(
-            """
+            f"""
             SELECT 
                 CLIENTNO, 
                 FNAME, 
@@ -317,7 +431,12 @@ def list_clients():
                 PREFTYPE, 
                 MAXRENT
             FROM DH_CLIENT
-        """
+            {where_clause}
+            ORDER BY {sorting_by}
+            OFFSET :offset ROWS
+            FETCH NEXT :limit ROWS ONLY
+        """,
+            {"offset": offset, "limit": limit, **filters},
         )
         rows = cursor.fetchall()
 
@@ -337,7 +456,9 @@ def list_clients():
             for row in rows
         ]
 
-    return jsonify(clients), 200
+    response = jsonify(clients)
+    response.headers.add("x-total-count", str(count))
+    return response, 200
 
 
 @dh_routes.route("/client/<client_no>", methods=["GET"])

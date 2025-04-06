@@ -13,12 +13,24 @@ const mapId = (resource) => (record) => ({
 
 export const dataProvider = {
   getList: async (resource, params) => {
-    const response = await fetch(`${API_URL}/${resource}`, {
+    const { page, perPage } = params.pagination;
+    const { field, order } = params.sort;
+    const { filter } = params;
+    const query = {
+      _page: page,
+      _limit: perPage,
+      _sort: field,
+      _order: order,
+      filter: JSON.stringify(filter?.filters),
+    };
+    const searchParams = new URLSearchParams(query).toString();
+    const response = await fetch(`${API_URL}/${resource}?${searchParams}`, {
       mode: "cors",
       headers: { "Content-Type": "application/json" },
     });
     const data = await response.json();
-    return { data: data.map(mapId(resource)), total: data.length };
+    const total = response.headers.get("X-Total-Count");
+    return { data: data.map(mapId(resource)), total: total };
   },
 
   getOne: async (resource, params) => {
