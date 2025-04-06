@@ -7,6 +7,7 @@ import {
   TextInput,
   useRecordContext,
 } from "react-admin";
+import { MyToolbar } from "./CustomToolbar";
 
 const Form = () => (
   <SimpleForm>
@@ -42,7 +43,7 @@ const EditClientForm = () => {
       <div style={{ margin: "1em" }}>
         <Typography variant="h3">{`Client ${record.first_name} ${record.last_name}`}</Typography>
       </div>
-      <SimpleForm>
+      <SimpleForm toolbar={<MyToolbar />}>
         <TextInput source="phone" label="Phone number" />
         <TextInput source="street" label="Street" />
         <TextInput source="city" label="City" />

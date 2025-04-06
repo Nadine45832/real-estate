@@ -6,6 +6,7 @@ import {
   TextInput,
   useRecordContext,
 } from "react-admin";
+import { MyToolbar } from "./CustomToolbar";
 
 const Form = () => (
   <SimpleForm>
@@ -34,7 +35,7 @@ const EditBranchForm = () => {
       <div style={{ margin: "1em" }}>
         <Typography variant="h3">{`Branch #${record.branch_no}`}</Typography>
       </div>
-      <SimpleForm>
+      <SimpleForm toolbar={<MyToolbar />}>
         <TextInput source="street" label="Street" />
         <TextInput source="city" label="City" />
         <TextInput source="postcode" label="Postcode" />

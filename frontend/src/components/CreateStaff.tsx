@@ -10,6 +10,7 @@ import {
   TextInput,
   useRecordContext,
 } from "react-admin";
+import { MyToolbar } from "./CustomToolbar";
 
 const Form = () => (
   <SimpleForm>
@@ -60,7 +61,7 @@ const EditStaffForm = () => {
         <Typography variant="body2">Position: {record.position}</Typography>
         <Typography variant="body2">Branch: {record.branch_no}</Typography>
       </div>
-      <SimpleForm>
+      <SimpleForm toolbar={<MyToolbar />}>
         <NumberInput source="salary" label="Salary" />
         <TextInput source="telephone" label="Telephone" />
         <TextInput source="email" label="Email" />

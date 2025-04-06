@@ -4,14 +4,18 @@ import {
   TextField,
   NumberField,
   EmailField,
-  SelectInput,
   TextInput,
 } from "react-admin";
 
 const getClientFilter = () => [
-  <TextInput key="city" label="City" source="filters.city" alwaysOn />,
+  <TextInput key="city" label="City" source="filters.city" />,
   <TextInput label="Street" source="filters.street" key="street" />,
   <TextInput label="First Name" source="filters.first_name" key="first_name" />,
+  <TextInput
+    label="Property Type"
+    source="filters.pref_type"
+    key="pref_type"
+  />,
 ];
 
 export const ClientList = () => (

@@ -59,7 +59,9 @@ def get_params(map_sort: dict, default_sort: str):
         filters = {}
 
     mapped_filters = {
-        map_sort.get(k, k): f"%{str(v).strip()}%" for k, v in filters.items() if v
+        map_sort.get(k, k): f"%{str(v).strip().lower()}%"
+        for k, v in filters.items()
+        if v
     }
     try:
         limit = int(params.get("_limit", "").strip() or "10")
@@ -406,7 +408,9 @@ def list_clients():
     count = 0
 
     if filters:
-        where_clause = " AND ".join([f"{key} LIKE :{key}" for key in filters.keys()])
+        where_clause = " AND ".join(
+            [f"LOWER({key}) LIKE :{key}" for key in filters.keys()]
+        )
     else:
         where_clause = "1=1"
     where_clause = f"WHERE {where_clause}"
